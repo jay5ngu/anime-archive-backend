@@ -90,7 +90,16 @@ class anilistAPI:
 
         return response.json()["data"]["Page"]["media"]
 
-           
+
+    # Retrieves all shows from user's shows in database
+    def getAnimeByUser(self, userShows: list[dict]) -> list[dict]:
+        result = []
+        for show in userShows:
+            result.append(self.getAnimeByID(show["show_id"]))
+        return result
+
+
+    ### FOR TESTING PURPOSES ONLY ###
     def getAnimeByName(self, name: str) -> dict:
         animeList = self.browseAnimeByName(name)
         if animeList:
@@ -102,6 +111,8 @@ class anilistAPI:
         print("No shows found")
         return None
 
+
+    ### FOR TESTING PURPOSES ONLY ###
     def createTestData(self, shows: list[int]) -> list[dict]:
         result = []
         for show in shows:
@@ -112,9 +123,10 @@ class anilistAPI:
 
         return result
 
+
 if __name__ == "__main__":
     animeAPI = anilistAPI()
     # animeAPI.getAnimeByID(20920)
-    animeAPI.browseAnimeByName("gravity falls")
-    # animeAPI.getAnimeByName(" is it wrong to pick up girls in ")
+    animeAPI.browseAnimeByName("Call of the Night")
+    animeAPI.getAnimeByName("Call of the Night ")
     # animeAPI.createTestData([150672, 151807, 153518, 101280, 196187, 21613, 155907, 126403, 154587, 21827, 21660])
