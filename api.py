@@ -1,31 +1,42 @@
 import os
-from flask import Flask
+from flask import Flask, jsonify, request
 from dotenv import load_dotenv
 from postgres import Postgres
 from anime import anilistAPI
 
 load_dotenv()
 
+# Initialize Flask server
 app = Flask(__name__)
 
+# Initialize supabase database
 supabase = Postgres(
     os.environ.get("SUPABASE_URL"),
-    os.environ.get("SUPABASE_PUBLISHABLE_KEY")
+    os.environ.get("SUPABASE_SECRET_KEY")
 )
 
+# Initialize anime api
 anime = anilistAPI()
 
-@app.route('/')
-def index():
-    response = supabase.table('instruments').select("*").execute()
-    instruments = response.data
+@app.route('/search/<title>', methods=['GET'])
+def search(title:str):
+    response = anime.browseAnimeByName(name=title)
+    return jsonify(response)
 
-    html = '<h1>Instruments</h1><ul>'
-    for instrument in instruments:
-        html += f'<li>{instrument["name"]}</li>'
-    html += '</ul>'
+@app.route('/addShow', methods=['POST'])
+def addShow():
+    data = request.get_json()
+    response = supabase.addShowToUser(showID=data['show_id'], userID=data['user_id'])
+    if response:
+        return jsonify({'status' : 201})
 
-    return html
+    return jsonify({'status' : 400})
+
+@app.route('/myShows', methods=['POST'])
+def allUserShows():
+    data = request.get_json()
+    response = supabase.retrieveAllShowsFromUser(userID=data["user_id"])
+    return jsonify(response)
 
 if __name__ == '__main__':
     app.run(debug=True)
