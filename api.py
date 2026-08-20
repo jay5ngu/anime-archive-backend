@@ -25,6 +25,11 @@ def search(title:str):
 
 @app.route('/addShow', methods=['POST'])
 def addShow():
+    """
+    Request Body:
+    user_id: int
+    show_id: int
+    """
     data = request.get_json()
     response = supabase.addShowToUser(showID=data['show_id'], userID=data['user_id'])
     if response:
@@ -32,10 +37,14 @@ def addShow():
 
     return jsonify({'status' : 400})
 
-@app.route('/myShows', methods=['POST'])
+@app.route('/myShowsInfo', methods=['POST'])
 def allUserShows():
+    """
+    Request Body:
+    user_id: int
+    """
     data = request.get_json()
-    response = supabase.retrieveAllShowsFromUser(userID=data["user_id"])
+    response = supabase.retrieveAllShowInfoFromUser(userID=data["user_id"])
     return jsonify(response)
 
 if __name__ == '__main__':

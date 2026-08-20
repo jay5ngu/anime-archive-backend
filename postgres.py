@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from supabase import create_client, Client
 import bcrypt
 from postgrest.exceptions import APIError
+from anime import anilistAPI
 
 # Load variables from the .env file into the system environment
 load_dotenv()
@@ -10,6 +11,7 @@ load_dotenv()
 class Postgres:
     def __init__(self, url, key):
         self.supabase: Client = create_client(url, key)
+        self.animeAPI = anilistAPI()
 
     def _encryptPassword(self, password: str) -> str:
         # Convert string to bytes (bcrypt requires byte inputs)
@@ -91,9 +93,16 @@ class Postgres:
     def removeShowFromUser(self, showID:int, userID:int) -> bool:
         pass
 
-    def retrieveAllShowsFromUser(self, userID:int) -> bool:
+    def retrieveAllShowIDsFromUser(self, userID:int) -> list[dict]:
         response = self.supabase.table("user_shows").select("show_id").eq("user_id", userID).execute()
         return response.data
+
+    def retrieveAllShowInfoFromUser(self, userID:int) -> list[dict]:
+        showIDs = self.retrieveAllShowIDsFromUser(userID)
+        result = []
+        for show in showIDs:
+            result.append(self.animeAPI.getAnimeByID(show["show_id"]))
+        return result
 
 
 if __name__ == "__main__":
@@ -111,7 +120,10 @@ if __name__ == "__main__":
     # print(pg.retrieveUser("test@gmail.com", "test1234"))
 
     # Test assigning show to user
-    pg.addShowToUser(151807, 9)
+    # pg.addShowToUser(151807, 9)
 
-    # Test retrieving all user shows
-    print(pg.retrieveAllShowsFromUser(9))
+    # Test retrieving all user show ids
+    # print(pg.retrieveAllShowIDsFromUser(9))
+
+    # Test retrieving all user show info
+    print(pg.retrieveAllShowInfoFromUser(9))
