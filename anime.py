@@ -47,12 +47,15 @@ class anilistAPI:
         response = requests.post(self.url, json={'query': query, 'variables': variables})
 
         # Retrieve and Parse json
-        jsonData = response.json()["data"]["Media"]
-        jsonData["description"] = self.cleanDescription(jsonData["description"])
-        jsonData["startDate"] = self.cleanDate(jsonData["startDate"])
+        if response.status_code == 200:
+            jsonData = response.json()["data"]["Media"]
+            jsonData["description"] = self.cleanDescription(jsonData["description"])
+            jsonData["startDate"] = self.cleanDate(jsonData["startDate"])
+        else:
+            jsonData = response.json()["errors"]
 
-        with open("byId.json", "w") as file:
-            json.dump(jsonData, file)
+        # with open("byId.json", "w") as file:
+        #     json.dump(jsonData, file)
 
         return jsonData
 
@@ -126,7 +129,7 @@ class anilistAPI:
 
 if __name__ == "__main__":
     animeAPI = anilistAPI()
-    # animeAPI.getAnimeByID(20920)
-    animeAPI.browseAnimeByName("Call of the Night")
-    animeAPI.getAnimeByName("Call of the Night ")
+    animeAPI.getAnimeByID(20920)
+    # animeAPI.browseAnimeByName("Call of the Night")
+    # animeAPI.getAnimeByName("Call of the Night ")
     # animeAPI.createTestData([150672, 151807, 153518, 101280, 196187, 21613, 155907, 126403, 154587, 21827, 21660])
