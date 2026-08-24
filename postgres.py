@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from supabase import create_client, Client
 import bcrypt
 from postgrest.exceptions import APIError
-from anime import anilistAPI
 
 # Load variables from the .env file into the system environment
 load_dotenv()
@@ -11,7 +10,6 @@ load_dotenv()
 class Postgres:
     def __init__(self, url, key):
         self.supabase: Client = create_client(url, key)
-        self.animeAPI = anilistAPI()
 
     def _encryptPassword(self, password: str) -> str:
         # Convert string to bytes (bcrypt requires byte inputs)
@@ -25,6 +23,7 @@ class Postgres:
 
         # Convert bytes to string (database cannot store type bytes)
         return hashedPassword.decode("utf-8")
+
 
     def _decryptPassword(self, hashedPassword:str, userInput:str) -> str:
         userInputBytes = userInput.encode('utf-8')
@@ -58,6 +57,9 @@ class Postgres:
                 return self._decryptPassword(hashedPassword=dbPassword, userInput=password)
         except APIError as e:
             print("Error when retrieving user:", e)
+            return False
+        except Exception as e:
+            print("General error:", e)
             return False
 
 
@@ -94,15 +96,13 @@ class Postgres:
         pass
 
     def retrieveAllShowIDsFromUser(self, userID:int) -> list[dict]:
-        response = self.supabase.table("user_shows").select("show_id").eq("user_id", userID).execute()
-        return response.data
-
-    def retrieveAllShowInfoFromUser(self, userID:int) -> list[dict]:
-        showIDs = self.retrieveAllShowIDsFromUser(userID)
-        result = []
-        for show in showIDs:
-            result.append(self.animeAPI.getAnimeByID(show["show_id"]))
-        return result
+        try:
+            response = self.supabase.table("user_shows").select("show_id").eq("user_id", userID).execute()
+            return response.data
+        except APIError as e:
+            print("Error when retrieving user:", e)
+        except Exception as e:
+            print("General error:", e)            
 
 
 if __name__ == "__main__":
