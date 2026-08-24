@@ -1,6 +1,8 @@
 import requests
 import json
 
+# API documentation: https://docs.anilist.co/
+
 class anilistAPI:
     def __init__(self):
         self.url = 'https://graphql.anilist.co'
@@ -14,7 +16,7 @@ class anilistAPI:
         return f"{startDate["month"]}/{startDate["year"]}"
     
 
-    def getAnimeByID(self, id: int) -> dict: 
+    def getAnimeByID(self, id: int) -> tuple[int, dict]: 
         query = '''
             query ($id: Int) { # Define which variables will be used in the query (id)
                 Media (id: $id, type: ANIME) { # Insert our variables into the query arguments (id) (type: ANIME is hard-coded in the query)
@@ -57,10 +59,10 @@ class anilistAPI:
         # with open("byId.json", "w") as file:
         #     json.dump(jsonData, file)
 
-        return jsonData
+        return response.status_code, jsonData
 
 
-    def browseAnimeByName(self, name: str) -> list[dict]:
+    def browseAnimeByName(self, name: str) -> tuple[int, list[dict]]:
         query = '''
             query ($search: String!) {
                 Page {
@@ -88,48 +90,28 @@ class anilistAPI:
         # Make the HTTP Api request
         response = requests.post(self.url, json={'query': query, 'variables': variables})
         
-        with open("browse.json", "w") as file:
-            json.dump(response.json()["data"]["Page"]["media"], file)
+        # with open("browse.json", "w") as file:
+        #     json.dump(response.json()["data"]["Page"]["media"], file)
 
-        return response.json()["data"]["Page"]["media"]
+        if response.status_code == 200:
+            return response.status_code, response.json()["data"]["Page"]["media"]
+        else: 
+            return response.status_code, response.json()["errors"]
 
-
-    # Retrieves all shows from user's shows in database
-    def getAnimeByUser(self, userShows: list[dict]) -> list[dict]:
-        result = []
-        for show in userShows:
-            result.append(self.getAnimeByID(show["show_id"]))
-        return result
-
-
-    ### FOR TESTING PURPOSES ONLY ###
-    def getAnimeByName(self, name: str) -> dict:
-        animeList = self.browseAnimeByName(name)
-        if animeList:
-            anime = self.getAnimeByID(animeList[0]["id"])
-            return anime
-        # with open("byName.json", "w") as file:
-        #     json.dump(anime, file)
-
-        print("No shows found")
-        return None
-
-
-    ### FOR TESTING PURPOSES ONLY ###
-    def createTestData(self, shows: list[int]) -> list[dict]:
-        result = []
-        for show in shows:
-            result.append(self.getAnimeByID(show))
-
-        with open("myShows.json", "w") as file:
-            json.dump(result, file)
-
-        return result
+        # Retrieves all shows from user's show info in database
+    def retrieveAllShowInfoFromUser(self, showIDs:list[dict]) -> tuple[int, list[dict]]:
+        try:
+            result = []
+            for show in showIDs:
+                showInfo = self.getAnimeByID(show["show_id"])
+                result.append(showInfo[1])
+            return 200, result
+        except Exception as e:
+            print("General error:", e)
+            return 400, [{"error": e}]
 
 
 if __name__ == "__main__":
     animeAPI = anilistAPI()
-    animeAPI.getAnimeByID(20920)
-    # animeAPI.browseAnimeByName("Call of the Night")
-    # animeAPI.getAnimeByName("Call of the Night ")
-    # animeAPI.createTestData([150672, 151807, 153518, 101280, 196187, 21613, 155907, 126403, 154587, 21827, 21660])
+    # print(animeAPI.getAnimeByID(20920))
+    animeAPI.browseAnimeByName("Call of the Night")
