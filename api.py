@@ -60,6 +60,15 @@ def allUserShows():
     """
     data = request.get_json()
     supaResult = supabase.retrieveAllShowIDsFromUser(userID=data["user_id"])
+    if supaResult[0] != 200:
+        response = {
+            "success": False,
+            "status": supaResult[0],
+            "message": "Unable to get show IDs from user's account",
+            "data": supaResult[1]
+        }
+        return jsonify(response)
+    
     animeResult = anime.retrieveAllShowInfoFromUser(supaResult)
     if animeResult[0] == 200:
         response = {
@@ -72,7 +81,7 @@ def allUserShows():
         response = {
             "success": False,
             "status": animeResult[0],
-            "message": "User's show info unsuccessful.",
+            "message": "Unable to get show info from Anime site",
             "data": animeResult[1]
         }
     return jsonify(response)

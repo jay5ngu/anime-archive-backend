@@ -95,14 +95,14 @@ class Postgres:
     def removeShowFromUser(self, showID:int, userID:int) -> bool:
         pass
 
-    def retrieveAllShowIDsFromUser(self, userID:int) -> list[dict]:
+    def retrieveAllShowIDsFromUser(self, userID:int) -> tuple[int, list[dict]]:
         try:
             response = self.supabase.table("user_shows").select("show_id").eq("user_id", userID).execute()
-            return response.data
+            return 200, response.data
         except APIError as e:
-            print("Error when retrieving user:", e)
-        except Exception as e:
-            print("General error:", e)            
+            return 500, [{"error": str(e)}]
+        except Exception as e:   
+            return 500, [{"error": str(e)}]
 
 
 if __name__ == "__main__":
@@ -126,4 +126,4 @@ if __name__ == "__main__":
     # print(pg.retrieveAllShowIDsFromUser(9))
 
     # Test retrieving all user show info
-    print(pg.retrieveAllShowInfoFromUser(9))
+    print(pg.retrieveAllShowIDsFromUser(9))

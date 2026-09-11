@@ -99,6 +99,8 @@ class anilistAPI:
             return response.status_code, response.json()["errors"]
 
         # Retrieves all shows from user's show info in database
+    
+    
     def retrieveAllShowInfoFromUser(self, showIDs:list[dict]) -> tuple[int, list[dict]]:
         try:
             result = []
