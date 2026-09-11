@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request
 from dotenv import load_dotenv
 from postgres import Postgres
-from anime import anilistAPI
+from anilistAPI import anilistAPI
 
 load_dotenv()
 
@@ -46,6 +46,14 @@ def addShow():
     show_id: int
     """
     data = request.get_json()
+
+    # Add show info to database if it doesn't exist
+    showExist = supabase.checkShowExists(data['show_id'])
+    if not showExist:
+        showInfo = anime.getAnimeByID(data['show_id'])
+        supabase.createShow(showInfo[1])
+
+    # Add show to user's list
     response = supabase.addShowToUser(showID=data['show_id'], userID=data['user_id'])
     if response:
         return jsonify({'status' : 201})
