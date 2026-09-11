@@ -113,7 +113,7 @@ class anilistAPI:
             return 200, result
         except Exception as e:
             print("General Anime API error:", e)
-            return 400, [{"error": e}]
+            return 500, [{"error": e}]
 
 
 if __name__ == "__main__":
