@@ -83,9 +83,37 @@ class Postgres:
         pass
     
     """
+    def checkShowExists(self, showID:int) -> bool:
+        try:
+            # Check if show exists in show database
+            showResponse = self.supabase.table("shows").select("show_id").eq("show_id", showID).execute()
+            return len(showResponse.data) == 1
+        except Exception as e:
+            print(e)
+            return False
+
+        
+    def createShow(self, showInfo:dict) -> bool:
+        try:
+            response = self.supabase.table("shows").insert({
+                "show_id": showInfo["id"],
+                "title": showInfo["title"]["english"],
+                "description": showInfo["description"],
+                "start_date": showInfo["startDate"],
+                "spine_color": showInfo["coverImage"]["color"],
+                "image_medium": showInfo["coverImage"]["medium"],
+                "image_large": showInfo["coverImage"]["large"]
+            }).execute()
+
+            return (len(response.data)) != 0
+        except Exception as e:
+            print(e)
+            return False
+
 
     def addShowToUser(self, showID:int, userID:int) -> bool:
         try:
+            # Add show to user's list
             response = self.supabase.table("user_shows").insert({"show_id": showID, "user_id": userID}).execute()
             return (len(response.data)) != 0
         except Exception as e:
