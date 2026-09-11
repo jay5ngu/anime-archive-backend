@@ -105,15 +105,18 @@ class anilistAPI:
         try:
             result = []
             for show in showIDs:
-                showInfo = self.getAnimeByID(show["show_id"])
+                status, showInfo = self.getAnimeByID(show["show_id"])
+                if status != 200:
+                    return status, [{"error": showInfo[0]['message']}]
                 result.append(showInfo[1])
+                    
             return 200, result
         except Exception as e:
-            print("General error:", e)
+            print("General Anime API error:", e)
             return 400, [{"error": e}]
 
 
 if __name__ == "__main__":
     animeAPI = anilistAPI()
-    # print(animeAPI.getAnimeByID(20920))
-    animeAPI.browseAnimeByName("Call of the Night")
+    print(animeAPI.getAnimeByID(20920))
+    # animeAPI.browseAnimeByName("Call of the Night")

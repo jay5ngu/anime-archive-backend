@@ -100,8 +100,10 @@ class Postgres:
             response = self.supabase.table("user_shows").select("show_id").eq("user_id", userID).execute()
             return 200, response.data
         except APIError as e:
+            print("Supabase API error:", e)
             return 500, [{"error": str(e)}]
         except Exception as e:   
+            print("General postgres error", e)
             return 500, [{"error": str(e)}]
 
 

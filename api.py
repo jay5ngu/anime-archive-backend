@@ -68,15 +68,15 @@ def allUserShows():
             "data": supaResult[1]
         }
         return jsonify(response)
-    
-    animeResult = anime.retrieveAllShowInfoFromUser(supaResult)
+
+    animeResult = anime.retrieveAllShowInfoFromUser(supaResult[1])
     if animeResult[0] == 200:
         response = {
             "success": True,
             "status": animeResult[0],
             "message": "User's show info retrieved successfully.",
             "data": animeResult[1]
-        }
+        } 
     else:
         response = {
             "success": False,
