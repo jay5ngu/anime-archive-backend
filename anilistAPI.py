@@ -118,5 +118,5 @@ class anilistAPI:
 
 if __name__ == "__main__":
     animeAPI = anilistAPI()
-    print(animeAPI.getAnimeByID(20920))
+    # print(animeAPI.getAnimeByID(20920))
     # animeAPI.browseAnimeByName("Call of the Night")
