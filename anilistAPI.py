@@ -108,7 +108,7 @@ class anilistAPI:
                 status, showInfo = self.getAnimeByID(show["show_id"])
                 if status != 200:
                     return status, [{"error": showInfo[0]['message']}]
-                result.append(showInfo[1])
+                result.append(showInfo)
                     
             return 200, result
         except Exception as e:
